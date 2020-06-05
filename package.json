@@ -1,7 +1,7 @@
 {
   "name": "old-timey",
   "version": "1.0.0",
-  "description": "",
+  "description": "Converts videos to black and white",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,10 +10,13 @@
     "type": "git",
     "url": "git+https://github.com/JWaltuch/old-timey.git"
   },
-  "author": "",
+  "author": "Jenna W",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/JWaltuch/old-timey/issues"
   },
-  "homepage": "https://github.com/JWaltuch/old-timey#readme"
+  "homepage": "https://github.com/JWaltuch/old-timey#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
