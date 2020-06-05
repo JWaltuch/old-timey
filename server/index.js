@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const port = 3000;
+var multer = require('multer');
 
 // POST: uploads the file and redirects to /:key
 // /:key
@@ -13,7 +14,10 @@ const port = 3000;
 // static file-serving middleware
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-app.post('/', (req, res, next) => {
+//middleware to upload file to destination using multer
+var upload = multer({ dest: 'videos/' });
+
+app.post('/', upload.single('video'), (req, res, next) => {
   console.log(req);
 });
 
