@@ -1,9 +1,8 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const port = 3000;
 
-// / (root)
-// GET: returns the upload form for a video
 // POST: uploads the file and redirects to /:key
 // /:key
 // :key is a generated UUID
@@ -11,8 +10,15 @@ const port = 3000;
 // /list
 // GET: show all uploaded content. Mostly for debugging.
 
-app.get('/', (req, res, next) =>
-  res.sendFile('/Users/Jenna/Documents/Codes/old-timey/client/index.html')
-);
+// static file-serving middleware
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.post('/', (req, res, next) => {
+  console.log(req);
+});
+
+app.use('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client/index.html'));
+});
 
 app.listen(port, () => console.log(`Ready to old time it up at port ${port}!`));
