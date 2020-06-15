@@ -15,24 +15,38 @@ var multer = require('multer');
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 //setup storage and filename multer will use
-var storage = multer.diskStorage({
+let storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, '../videos');
+    cb(null, '/videos');
   },
   filename: function(req, file, cb) {
     cb(null, req.body.filename + '.mov');
   },
 });
+function fileFilter(req, file, cb) {
+  cb(null, file.mimetype === 'video/quicktime');
+}
 //middleware to upload file to destination using multer
-var upload = multer({ storage: storage });
+var upload = multer({ storage: storage, fileFilter: fileFilter });
 
 app.post('/', upload.single('video'), (req, res, next) => {
-  // console.log(req);
+  // let extension = path.extname(req.file.originalname).toLowerCase();
+  // if (extension !== '.mov') {
+  //   throw new Error('Cannot accept files that are not .mov');
+  // } else {
+  //   res.end('Uploaded!');
+  // }
   res.end('Uploaded!');
 });
 
 app.use('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'client/index.html'));
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  console.error(err.stack);
+  res.status(err.status || 500).send(err.message || 'Internal server error.');
 });
 
 app.listen(port, () => console.log(`Ready to old time it up at port ${port}!`));
