@@ -32,18 +32,22 @@ function fileFilter(req, file, cb) {
   cb(null, file.mimetype === 'video/quicktime');
 }
 //middleware to upload file to destination using multer
-var upload = multer({ storage: storage, fileFilter: fileFilter });
+var upload = multer({ storage: storage, fileFilter: fileFilter }).single(
+  'video'
+);
 
-app.post('/', upload.single('video'), (req, res, next) => {
-  //HANDLES ERRORS IF USER UPLOADS NO FILE
-  //HANDLE ERRORS IF USER UPLOADS WRONG TYPE OF FILE
-  // let extension = path.extname(req.file.originalname).toLowerCase();
-  // if (extension !== '.mov') {
-  //   throw new Error('Cannot accept files that are not .mov');
-  // } else {
-  //   res.end('Uploaded!');
-  // }
-  res.end('Uploaded!');
+app.post('/', (req, res, next) => {
+  upload(req, res, function(err) {
+    if (!req.file) {
+      //HANDLES ERRORS IF USER UPLOADS NO FILE
+      //HANDLE ERRORS IF USER UPLOADS WRONG TYPE OF FILE
+      res.status(422).send('You must upload a file that is a video type.');
+    } else if (err) {
+      return err;
+    } else {
+      res.end('Uploaded!');
+    }
+  });
 });
 
 app.use('*', (req, res) => {
