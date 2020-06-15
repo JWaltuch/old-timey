@@ -17,10 +17,15 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 //setup storage and filename multer will use
 let storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, '/videos');
+    cb(null, '../videos');
   },
   filename: function(req, file, cb) {
-    cb(null, req.body.filename + '.mov');
+    console.log(file);
+    if (req.body.filename !== '') {
+      cb(null, req.body.filename + '.mov');
+    } else {
+      cb(null, file.originalname + '.mov');
+    }
   },
 });
 function fileFilter(req, file, cb) {
@@ -30,7 +35,7 @@ function fileFilter(req, file, cb) {
 var upload = multer({ storage: storage, fileFilter: fileFilter });
 
 app.post('/', upload.single('video'), (req, res, next) => {
-  //HANDLES ERRORS IF USE UPLOADS NO FILE
+  //HANDLES ERRORS IF USER UPLOADS NO FILE
   //HANDLE ERRORS IF USER UPLOADS WRONG TYPE OF FILE
   // let extension = path.extname(req.file.originalname).toLowerCase();
   // if (extension !== '.mov') {
