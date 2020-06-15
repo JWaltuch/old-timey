@@ -20,7 +20,6 @@ let storage = multer.diskStorage({
     cb(null, '../videos');
   },
   filename: function(req, file, cb) {
-    console.log(file);
     if (req.body.filename !== '') {
       cb(null, req.body.filename + '.mov');
     } else {
@@ -39,8 +38,6 @@ var upload = multer({ storage: storage, fileFilter: fileFilter }).single(
 app.post('/', (req, res, next) => {
   upload(req, res, function(err) {
     if (!req.file) {
-      //HANDLES ERRORS IF USER UPLOADS NO FILE
-      //HANDLE ERRORS IF USER UPLOADS WRONG TYPE OF FILE
       res.status(422).send('You must upload a file that is a video type.');
     } else if (err) {
       return err;
