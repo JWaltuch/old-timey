@@ -24,7 +24,7 @@ let storage = multer.diskStorage({
     if (req.body.filename !== '') {
       cb(null, req.body.filename + '.mov');
     } else {
-      cb(null, file.originalname + '.mov');
+      cb(null, file.originalname);
     }
   },
 });
