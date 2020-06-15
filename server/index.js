@@ -30,6 +30,8 @@ function fileFilter(req, file, cb) {
 var upload = multer({ storage: storage, fileFilter: fileFilter });
 
 app.post('/', upload.single('video'), (req, res, next) => {
+  //HANDLES ERRORS IF USE UPLOADS NO FILE
+  //HANDLE ERRORS IF USER UPLOADS WRONG TYPE OF FILE
   // let extension = path.extname(req.file.originalname).toLowerCase();
   // if (extension !== '.mov') {
   //   throw new Error('Cannot accept files that are not .mov');
