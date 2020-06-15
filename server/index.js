@@ -14,11 +14,21 @@ var multer = require('multer');
 // static file-serving middleware
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+//setup storage and filename multer will use
+var storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, '../videos');
+  },
+  filename: function(req, file, cb) {
+    cb(null, req.body.filename + '.mov');
+  },
+});
 //middleware to upload file to destination using multer
-var upload = multer({ dest: 'videos/' });
+var upload = multer({ storage: storage });
 
 app.post('/', upload.single('video'), (req, res, next) => {
-  console.log(req);
+  // console.log(req);
+  res.end('Uploaded!');
 });
 
 app.use('*', (req, res) => {
