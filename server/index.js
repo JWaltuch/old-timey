@@ -2,7 +2,12 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const port = 3000;
-var multer = require('multer');
+const multer = require('multer');
+const exphbs = require('express-handlebars');
+
+//HANDLEBARS SETUP
+app.engine('handlebars', exphbs());
+app.set('view engine', 'handlebars');
 
 // POST: uploads the file and redirects to /:key
 // /:key
@@ -51,8 +56,26 @@ app.post('/', (req, res, next) => {
   });
 });
 
+app.get('/list', (req, res, next) => {
+  res.render('list', {
+    videos: [{ name: 'CUPCAKE', id: 1 }, { name: 'IMG_1078', id: 2 }],
+  });
+});
+
+app.get('/:key', (req, res, next) => {
+  //if ready, send url
+  if (true) {
+    res.render('video', {
+      url: '/fakeurl',
+    });
+  } else {
+    //else, send no url
+    res.render('video');
+  }
+});
+
 app.use('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'client/index.html'));
+  res.render('home');
 });
 
 app.use((err, req, res, next) => {
