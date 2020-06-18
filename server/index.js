@@ -56,15 +56,20 @@ app.post('/', (req, res, next) => {
   });
 });
 
+const videos = {
+  1: { name: 'CUPCAKE', url: '/fakeurl' },
+  2: { name: 'IMG_1078' },
+};
+
 app.get('/list', (req, res, next) => {
   res.render('list', {
-    videos: [{ name: 'CUPCAKE', id: 1 }, { name: 'IMG_1078', id: 2 }],
+    videos: videos,
   });
 });
 
 app.get('/:key', (req, res, next) => {
   //if ready, send url
-  if (true) {
+  if (videos[req.params.key].url) {
     res.render('video', {
       url: '/fakeurl',
     });
