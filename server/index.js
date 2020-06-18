@@ -51,7 +51,7 @@ app.post('/', (req, res, next) => {
     } else if (!req.file) {
       res.status(422).send('You must upload a file that is a video type.');
     } else {
-      res.end('Uploaded!');
+      res.redirect('/1');
     }
   });
 });
