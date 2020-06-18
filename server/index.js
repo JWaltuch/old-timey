@@ -37,6 +37,7 @@ var upload = multer({ storage: storage, fileFilter: fileFilter }).single(
 
 app.post('/', (req, res, next) => {
   upload(req, res, function(err) {
+    //TODO: MUST HANDLE DUPLICATES
     if (!req.file) {
       res.status(422).send('You must upload a file that is a video type.');
     } else if (err) {
