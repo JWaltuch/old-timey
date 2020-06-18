@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 //setup storage and filename multer will use
 let storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    cb(null, '../videos');
+    cb(null, '/var/old-timey/videos');
   },
   filename: function(req, file, cb) {
     if (req.body.filename !== '') {
