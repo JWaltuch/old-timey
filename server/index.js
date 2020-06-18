@@ -35,6 +35,8 @@ var upload = multer({ storage: storage, fileFilter: fileFilter }).single(
   'video'
 );
 
+//ROUTES
+
 app.post('/', (req, res, next) => {
   upload(req, res, function(err) {
     //TODO: MUST HANDLE DUPLICATES
