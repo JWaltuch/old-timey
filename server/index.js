@@ -70,14 +70,7 @@ app.get('/list', (req, res, next) => {
 app.get('/:key', (req, res, next) => {
   //if ready, send url
   const video = videos[req.params.key];
-  if (video.url) {
-    res.render('video', {
-      url: video.url,
-    });
-  } else {
-    //else, send no url
-    res.render('video');
-  }
+  res.render('video', video);
 });
 
 app.use('*', (req, res) => {
