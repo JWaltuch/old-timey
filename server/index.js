@@ -5,7 +5,7 @@ const port = 3000;
 const multer = require('multer');
 const exphbs = require('express-handlebars');
 const redis = require('redis');
-import { v1 as uuidv1 } from 'uuid';
+const { v1: uuidv1 } = require('uuid');
 
 //HANDLEBARS SETUP
 app.engine('handlebars', exphbs());
@@ -52,7 +52,7 @@ app.post('/', (req, res, next) => {
       res.render('media-error');
     } else {
       let id = uuidv1();
-      while (client.exists(id)) {
+      while (client.exists(`videos:${id}`) === 1) {
         id = uuidv1();
       }
       client.hmset(`videos:${id}`, {
@@ -70,10 +70,20 @@ const videos = {
 };
 
 app.get('/list', (req, res, next) => {
-  let allVids = client.hgetall('videos');
-  console.log(allVids);
-  res.render('list', {
-    videos: videos,
+  client.hgetall('videos:e895d3d0-b25c-11ea-93ca-05d9482131a4', function(
+    err,
+    resp
+  ) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(resp);
+      let allVids = resp;
+      console.log(allVids);
+      res.render('list', {
+        videos: videos,
+      });
+    }
   });
 });
 
