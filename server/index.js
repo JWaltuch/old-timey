@@ -49,7 +49,7 @@ app.post('/', (req, res, next) => {
       res.send(err.message);
       return err;
     } else if (!req.file) {
-      res.status(422).send('You must upload a file that is a video type.');
+      res.render('media-error');
     } else {
       res.redirect('/1');
     }
@@ -68,7 +68,6 @@ app.get('/list', (req, res, next) => {
 });
 
 app.get('/:key', (req, res, next) => {
-  //if ready, send url
   const video = videos[req.params.key];
   res.render('video', video);
 });
