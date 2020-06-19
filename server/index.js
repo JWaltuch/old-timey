@@ -4,17 +4,17 @@ const app = express();
 const port = 3000;
 const multer = require('multer');
 const exphbs = require('express-handlebars');
+const redis = require('redis');
 
 //HANDLEBARS SETUP
 app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
 
-// POST: uploads the file and redirects to /:key
-// /:key
-// :key is a generated UUID
-// This page shows the message “Video is still processing” or “Here’s a download link” that lets the user download the file directly from nginx.
-// /list
-// GET: show all uploaded content. Mostly for debugging.
+//REDIS SETUP
+const client = redis.createClient();
+client.on('connect', function() {
+  console.log('The redis client is connected.');
+});
 
 // static file-serving middleware
 app.use(express.static(path.join(__dirname, '..', 'public')));
