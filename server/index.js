@@ -55,31 +55,28 @@ app.post('/', (req, res, next) => {
       while (client.exists(`videos:${id}`) === 1) {
         id = uuidv1();
       }
-      client.hmset(`videos:${id}`, {
-        name: req.file.filename,
-        path: `/${id}`,
-      });
+      client.hmset(`videos:${id}`, 'name', req.file.filename, 'url', `/${id}`);
       res.redirect(`/${id}`);
     }
   });
 });
 
-const videos = {
-  1: { name: 'CUPCAKE', url: '/fakeurl' },
-  2: { name: 'IMG_1078' },
-};
-
 app.get('/list', (req, res, next) => {
-  client.hgetall('videos:e895d3d0-b25c-11ea-93ca-05d9482131a4', function(
-    err,
-    resp
-  ) {
+  let videos = {};
+  client.keys('video*', function(err, resp) {
     if (err) {
-      console.log(err);
+      throw new Error(err);
     } else {
-      console.log(resp);
-      let allVids = resp;
-      console.log(allVids);
+      let allKeys = resp;
+      allKeys.forEach(key => {
+        client.hgetall(key, function(err, resp) {
+          if (err) {
+            throw new Error(err);
+          } else {
+            videos[key] = resp;
+          }
+        });
+      });
       res.render('list', {
         videos: videos,
       });
@@ -88,7 +85,14 @@ app.get('/list', (req, res, next) => {
 });
 
 app.get('/:key', (req, res, next) => {
-  const video = videos[req.params.key];
+  let video = {};
+  client.hgetall(`video:${req.params.key}`, function(err, response) {
+    if (err) {
+      console.log(err);
+    } else {
+      video = response;
+    }
+  });
   res.render('video', video);
 });
 
