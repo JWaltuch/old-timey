@@ -6,6 +6,7 @@ const multer = require('multer');
 const exphbs = require('express-handlebars');
 const redis = require('redis');
 const amqp = require('amqplib/callback_api');
+const favicon = require('serve-favicon')
 const { v1: uuidv1 } = require('uuid');
 
 //HANDLEBARS SETUP
@@ -20,6 +21,7 @@ client.on('connect', function () {
 
 // MIDDLEWARE TO SERVE STATIC FILES
 app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(favicon(path.join(__dirname, '..', 'favicon.ico')))
 
 // MULTER SETUP: DEFAULT STORAGE AND FILENAME FUNCTIONS
 let storage = multer.diskStorage({
@@ -89,36 +91,34 @@ app.post('/', (req, res, next) => {
 });
 
 app.get('/list', (req, res, next) => {
-  let videos = {};
   client.keys('video*', function (err, resp) {
     if (err) {
-      throw new Error(err);
-    } else {
-      let allKeys = resp;
-      allKeys.forEach(key => {
-        client.hgetall(key, function (err, resp) {
-          if (err) {
-            throw new Error(err);
-          } else {
-            videos[key] = resp;
-          }
-        });
-      });
-      res.render('list', {
-        videos: videos,
-      });
+      return next(err);
     }
+    let allKeys = resp;
+    let videos = {}
+    allKeys.forEach(key => {
+      client.hgetall(key, function (err, resp) {
+        if (err) {
+          throw new Error(err);
+        } else {
+          videos[key] = resp;
+        }
+      });
+    });
+    return res.render('list', {
+      videos
+    });
   });
 });
 
 app.get('/:key', (req, res, next) => {
-  let video = {};
-  client.hgetall(`video:${req.params.key}`, function (err, response) {
+  let video = {}
+  client.hgetall(`videos:${req.params.key}`, function (err, response) {
     if (err) {
-      console.log(err);
-    } else {
-      video = response;
+      return next(err);
     }
+    video = response;
   });
   res.render('video', video);
 });
