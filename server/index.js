@@ -5,6 +5,7 @@ const port = 3000;
 const multer = require('multer');
 const exphbs = require('express-handlebars');
 const redis = require('redis');
+const { v1: uuidv1 } = require('uuid');
 
 //HANDLEBARS SETUP
 app.engine('handlebars', exphbs());
@@ -44,31 +45,54 @@ var upload = multer({ storage: storage, fileFilter: fileFilter }).single(
 
 app.post('/', (req, res, next) => {
   upload(req, res, function(err) {
-    //TODO: MUST HANDLE DUPLICATES
     if (err) {
       res.send(err.message);
       return err;
     } else if (!req.file) {
       res.render('media-error');
     } else {
-      res.redirect('/1');
+      let id = uuidv1();
+      while (client.exists(`videos:${id}`) === 1) {
+        id = uuidv1();
+      }
+      client.hmset(`videos:${id}`, 'name', req.file.filename, 'url', `/${id}`);
+      res.redirect(`/${id}`);
     }
   });
 });
 
-const videos = {
-  1: { name: 'CUPCAKE', url: '/fakeurl' },
-  2: { name: 'IMG_1078' },
-};
-
 app.get('/list', (req, res, next) => {
-  res.render('list', {
-    videos: videos,
+  let videos = {};
+  client.keys('video*', function(err, resp) {
+    if (err) {
+      throw new Error(err);
+    } else {
+      let allKeys = resp;
+      allKeys.forEach(key => {
+        client.hgetall(key, function(err, resp) {
+          if (err) {
+            throw new Error(err);
+          } else {
+            videos[key] = resp;
+          }
+        });
+      });
+      res.render('list', {
+        videos: videos,
+      });
+    }
   });
 });
 
 app.get('/:key', (req, res, next) => {
-  const video = videos[req.params.key];
+  let video = {};
+  client.hgetall(`video:${req.params.key}`, function(err, response) {
+    if (err) {
+      console.log(err);
+    } else {
+      video = response;
+    }
+  });
   res.render('video', video);
 });
 
