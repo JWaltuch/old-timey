@@ -6,6 +6,7 @@ const multer = require('multer');
 const exphbs = require('express-handlebars');
 const redis = require('redis');
 const amqp = require('amqplib/callback_api');
+const fs = require('fs')
 const favicon = require('serve-favicon')
 const { v1: uuidv1 } = require('uuid');
 
@@ -100,7 +101,7 @@ app.get('/list', (req, res, next) => {
     allKeys.forEach(key => {
       client.hgetall(key, function (err, resp) {
         if (err) {
-          throw new Error(err);
+          return next(err);
         } else {
           videos[key] = resp;
         }
@@ -117,10 +118,20 @@ app.get('/:key', (req, res, next) => {
   client.hgetall(`videos:${req.params.key}`, function (err, response) {
     if (err) {
       return next(err);
+    } else if (response === null) {
+      return res.render('page-not-found');
     }
     video = response;
+    try {
+      const path = `/var/old-timey/videos/BW/${video.name}`;
+      if (fs.existsSync(path)) {
+        video["urlBW"] = path;
+      }
+    } catch (err) {
+      return next(err)
+    }
+    res.render('video', video);
   });
-  res.render('video', video);
 });
 
 app.use('*', (req, res) => {
