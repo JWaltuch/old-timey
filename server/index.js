@@ -13,19 +13,19 @@ app.set('view engine', 'handlebars');
 
 //REDIS SETUP
 const client = redis.createClient();
-client.on('connect', function() {
+client.on('connect', function () {
   console.log('The redis client is connected.');
 });
 
-// static file-serving middleware
+// MIDDLEWARE TO SERVE STATIC FILES
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-//setup storage and filename multer will use
+// MULTER SETUP: DEFAULT STORAGE AND FILENAME FUNCTIONS
 let storage = multer.diskStorage({
-  destination: function(req, file, cb) {
+  destination: function (req, file, cb) {
     cb(null, '/var/old-timey/videos');
   },
-  filename: function(req, file, cb) {
+  filename: function (req, file, cb) {
     if (req.body.filename !== '') {
       cb(null, req.body.filename + '.mov');
     } else {
@@ -44,7 +44,7 @@ var upload = multer({ storage: storage, fileFilter: fileFilter }).single(
 //ROUTES
 
 app.post('/', (req, res, next) => {
-  upload(req, res, function(err) {
+  upload(req, res, function (err) {
     if (err) {
       res.send(err.message);
       return err;
@@ -63,13 +63,13 @@ app.post('/', (req, res, next) => {
 
 app.get('/list', (req, res, next) => {
   let videos = {};
-  client.keys('video*', function(err, resp) {
+  client.keys('video*', function (err, resp) {
     if (err) {
       throw new Error(err);
     } else {
       let allKeys = resp;
       allKeys.forEach(key => {
-        client.hgetall(key, function(err, resp) {
+        client.hgetall(key, function (err, resp) {
           if (err) {
             throw new Error(err);
           } else {
@@ -86,7 +86,7 @@ app.get('/list', (req, res, next) => {
 
 app.get('/:key', (req, res, next) => {
   let video = {};
-  client.hgetall(`video:${req.params.key}`, function(err, response) {
+  client.hgetall(`video:${req.params.key}`, function (err, response) {
     if (err) {
       console.log(err);
     } else {
