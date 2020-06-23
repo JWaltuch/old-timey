@@ -1,4 +1,5 @@
 const multer = require('multer');
+const fs = require('fs')
 
 // MULTER SETUP: DEFAULT STORAGE AND FILENAME FUNCTIONS
 const storage = multer.diskStorage({
@@ -6,10 +7,32 @@ const storage = multer.diskStorage({
     cb(null, '/var/old-timey/videos');
   },
   filename: function (req, file, cb) {
+    console.log("req", req)
+    console.log("file", file)
     if (req.body.filename !== '') {
-      cb(null, req.body.filename + '.mov');
+      try {
+        const path = `/var/old-timey/videos/${req.body.filename}.mov`;
+        if (fs.existsSync(path)) {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+          cb(null, `${req.body.filename}_${uniqueSuffix}.mov`);
+        } else {
+          cb(null, req.body.filename + '.mov');
+        }
+      } catch (err) {
+        return next(err)
+      }
     } else {
-      cb(null, file.originalname);
+      try {
+        const path = `/var/old-timey/videos/${file.originalname}.mov`;
+        if (fs.existsSync(path)) {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+          cb(null, `${file.originalname}_${uniqueSuffix}.mov`);
+        } else {
+          cb(null, file.originalname);
+        }
+      } catch (err) {
+        return next(err)
+      }
     }
   },
 });

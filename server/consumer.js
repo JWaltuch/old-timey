@@ -1,6 +1,7 @@
 const amqp = require('amqplib/callback_api');
 const { exec } = require("child_process");
 const { client } = require('./redis-client')
+const fs = require('fs')
 
 function listenToQueue() {
   amqp.connect('amqp://localhost', function (error0, connection) {
@@ -22,20 +23,30 @@ function listenToQueue() {
       channel.consume(queue, function (msg) {
         console.log(" [x] Received %s", msg.content.toString());
         const [key, path] = msg.content.toString().split(" ")
-        exec(`bash ~/old-timey/convert.bash ${path}`, (error, stdout, stderr) => {
-          if (error) {
-            console.log(`error: ${error.message}`);
-            return;
+        try {
+          const name = path.slice(22, -4);
+          const existingPath = `/var/old-timey/videos/BW/${name}_BW.mov`;
+          if (fs.existsSync(existingPath)) {
+            client.hmset(key, 'urlBW', name);
+          } else {
+            exec(`bash ~/old-timey/convert.bash ${path}`, (error, stdout, stderr) => {
+              if (error) {
+                console.log(`error: ${error.message}`);
+                return;
+              }
+              if (stderr) {
+                console.log(`stderror: ${stderr}`);
+                return;
+              }
+            }).on('exit', code => {
+              if (code === 0) {
+                client.hmset(key, 'urlBW', name);
+              }
+            });
           }
-          if (stderr) {
-            console.log(`stderror: ${stderr}`);
-            return;
-          }
-        }).on('exit', code => {
-          if (code === 0) {
-            client.hmset(key, 'urlBW', path.slice(22));
-          }
-        });
+        } catch (err) {
+          return next(err)
+        }
       },
         {
           noAck: true
