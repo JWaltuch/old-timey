@@ -2,13 +2,14 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const exphbs = require('express-handlebars');
-const redis = require('redis');
 const fs = require('fs')
 const favicon = require('serve-favicon')
 const { v1: uuidv1 } = require('uuid');
 
 const { sendToQueue } = require('./producer')
+const { listenToQueue } = require('./consumer')
 const { storage, fileFilter } = require('./multer')
+const { client } = require('./redis-client')
 
 const app = express();
 const port = 3000;
@@ -17,13 +18,7 @@ const port = 3000;
 app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
 
-//REDIS SETUP
-const client = redis.createClient();
-client.on('connect', function () {
-  console.log('The redis client is connected.');
-});
-
-// MIDDLEWARE TO SERVE STATIC FILES
+//MIDDLEWARE TO SERVE STATIC FILES
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(favicon(path.join(__dirname, '..', 'favicon.ico')))
 
@@ -32,10 +27,8 @@ const upload = multer({ storage: storage, fileFilter: fileFilter }).single(
   'video'
 );
 
-//set up consumer
-//consumer listens to queue
-//when new message, removes it, calls bash on it, writes to redis
-//no need to check for file anymore
+//SET UP CONSUMER TO LISTEN TO QUEUE
+listenToQueue();
 
 //ROUTES
 
@@ -52,7 +45,7 @@ app.post('/', (req, res, next) => {
         id = uuidv1();
       }
       client.hmset(`videos:${id}`, 'name', req.file.filename, 'url', `/${id}`);
-      sendToQueue(`videos:${id} /${id}`)
+      sendToQueue(`videos:${id} /var/old-timey/videos/${req.file.filename}`)
       res.redirect(`/${id}`);
     }
   });
@@ -89,14 +82,7 @@ app.get('/:key', (req, res, next) => {
       return res.render('page-not-found');
     }
     video = response;
-    try {
-      const path = `/var/old-timey/videos/BW/${video.name}`;
-      if (fs.existsSync(path)) {
-        video["urlBW"] = path;
-      }
-    } catch (err) {
-      return next(err)
-    }
+    video.urlBW = `http://192.168.0.105//videos/BW/${video.name}`
     res.render('video', video);
   });
 });
