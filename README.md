@@ -1,4 +1,4 @@
-##Old Timey
+# Old Timey
 
 An app for converting videos into black and white versions.
 
