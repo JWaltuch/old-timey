@@ -7,7 +7,7 @@ const fs = require('fs')
 const favicon = require('serve-favicon')
 const { v1: uuidv1 } = require('uuid');
 
-const sendToQueue = require('./producer')
+const { sendToQueue } = require('./producer')
 const { storage, fileFilter } = require('./multer')
 
 const app = express();

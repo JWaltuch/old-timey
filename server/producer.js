@@ -1,6 +1,6 @@
 const amqp = require('amqplib/callback_api');
 
-export function sendToQueue(msg) {
+function sendToQueue(msg) {
   amqp.connect('amqp://localhost', function (error0, connection) {
     if (error0) {
       throw error0;
@@ -23,3 +23,5 @@ export function sendToQueue(msg) {
     }, 500);
   });
 }
+
+module.exports = { sendToQueue }

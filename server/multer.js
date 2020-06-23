@@ -1,7 +1,7 @@
 const multer = require('multer');
 
 // MULTER SETUP: DEFAULT STORAGE AND FILENAME FUNCTIONS
-export const storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, '/var/old-timey/videos');
   },
@@ -13,6 +13,8 @@ export const storage = multer.diskStorage({
     }
   },
 });
-export function fileFilter(req, file, cb) {
+function fileFilter(req, file, cb) {
   cb(null, file.mimetype === 'video/quicktime');
 }
+
+module.exports = { storage, fileFilter }
