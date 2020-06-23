@@ -1,14 +1,17 @@
 const express = require('express');
 const path = require('path');
-const app = express();
-const port = 3000;
 const multer = require('multer');
 const exphbs = require('express-handlebars');
 const redis = require('redis');
-const amqp = require('amqplib/callback_api');
 const fs = require('fs')
 const favicon = require('serve-favicon')
 const { v1: uuidv1 } = require('uuid');
+
+const sendToQueue = require('./producer')
+const { storage, fileFilter } = require('./multer')
+
+const app = express();
+const port = 3000;
 
 //HANDLEBARS SETUP
 app.engine('handlebars', exphbs());
@@ -24,51 +27,15 @@ client.on('connect', function () {
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(favicon(path.join(__dirname, '..', 'favicon.ico')))
 
-// MULTER SETUP: DEFAULT STORAGE AND FILENAME FUNCTIONS
-let storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, '/var/old-timey/videos');
-  },
-  filename: function (req, file, cb) {
-    if (req.body.filename !== '') {
-      cb(null, req.body.filename + '.mov');
-    } else {
-      cb(null, file.originalname);
-    }
-  },
-});
-function fileFilter(req, file, cb) {
-  cb(null, file.mimetype === 'video/quicktime');
-}
-//middleware to upload file to destination using multer
-var upload = multer({ storage: storage, fileFilter: fileFilter }).single(
+//MIDDLEWARE TO DEFINE PARAMETERS FOR MULTER UPLOAD
+const upload = multer({ storage: storage, fileFilter: fileFilter }).single(
   'video'
 );
 
-// RABBITMQ SENDER FUNCTION
-function sendToQueue(msg) {
-  amqp.connect('amqp://localhost', function (error0, connection) {
-    if (error0) {
-      throw error0;
-    }
-    connection.createChannel(function (error1, channel) {
-      if (error1) {
-        throw error1;
-      }
-      let queue = 'video_paths';
-      channel.assertQueue(queue, {
-        durable: true
-      });
-      channel.sendToQueue(queue, Buffer.from(msg), {
-        persistent: true
-      });
-      console.log(" [x] Sent '%s'", msg);
-    });
-    setTimeout(function () {
-      connection.close();
-    }, 500);
-  });
-}
+//set up consumer
+//consumer listens to queue
+//when new message, removes it, calls bash on it, writes to redis
+//no need to check for file anymore
 
 //ROUTES
 
