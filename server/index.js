@@ -82,7 +82,10 @@ app.get('/:key', (req, res, next) => {
       return res.render('page-not-found');
     }
     video = response;
-    video.urlBW = `http://192.168.0.105//videos/BW/${video.name}_BW`
+    vidPrefix = video.name.slice(0, -4);
+    if (video.urlBW !== undefined) {
+      video.urlBW = `http://192.168.0.105/videos/BW/${vidPrefix}_BW.mov`
+    }
     res.render('video', video);
   });
 });
