@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const exphbs = require('express-handlebars');
-const fs = require('fs')
 const favicon = require('serve-favicon')
 const { v1: uuidv1 } = require('uuid');
 
