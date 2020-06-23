@@ -18,4 +18,4 @@ Nginx
 
 Express
 
-and ffmpeg
+ffmpeg
